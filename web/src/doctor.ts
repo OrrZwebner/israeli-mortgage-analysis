@@ -43,10 +43,12 @@ async function checkPandoc(): Promise<Check> {
   return version
     ? { name: "pandoc", status: "ok", detail: version.split("\n")[0] ?? "installed" }
     : {
+        // A warning, not a failure: without pandoc the report is still written
+        // and displayed in the browser — only the PDF download is lost.
         name: "pandoc",
-        status: "fail",
-        detail: "not found on PATH",
-        fix: "brew install pandoc   (Linux: apt-get install pandoc)",
+        status: "warn",
+        detail: "not found — the report still works, only the PDF download won't",
+        fix: "brew install pandoc, or the installer at pandoc.org/installing (Linux: apt install pandoc)",
       };
 }
 
@@ -125,8 +127,10 @@ function checkAuth(): Check {
     : {
         name: "auth",
         status: "fail",
-        detail: "no Claude credentials found",
-        fix: "Run `claude` once and log in, or export ANTHROPIC_API_KEY.",
+        detail: "not logged in to Claude",
+        fix:
+          "Install Claude Code (npm install -g @anthropic-ai/claude-code), " +
+          "run `claude`, and type /login. Needs a paid Claude plan.",
       };
 }
 

@@ -47,15 +47,24 @@ esac
 # --- Preflight -------------------------------------------------------------
 say "Checking the environment…"
 if ! npm run --silent doctor; then
-  fail "Fix the ✗ items above, then run ./run.sh again.
-The usual ones: 'claude' + /login for auth, 'brew install pandoc' for the PDF."
+  fail "Something above is marked ✗ — the line next to it says how to fix it.
+Then run ./run.sh again. (Items marked ! are fine to ignore for now.)"
 fi
 
 # --- Start -----------------------------------------------------------------
+URL="http://127.0.0.1:${MORTGAGE_WEB_PORT:-5173}"
+
 if [ "$MODE" = mobile ]; then
   say "Starting in mobile mode — scan the QR code below from your phone."
   MORTGAGE_WEB_MOBILE=1 exec node dist/server.js
 else
-  say "Starting… open http://127.0.0.1:${MORTGAGE_WEB_PORT:-5173} (Ctrl-C stops it)."
+  # Open the browser for them once the server is up. Best effort — if it
+  # doesn't open, the URL is printed anyway.
+  if command -v open >/dev/null 2>&1; then
+    (sleep 2 && open "$URL") >/dev/null 2>&1 &
+  elif command -v xdg-open >/dev/null 2>&1; then
+    (sleep 2 && xdg-open "$URL") >/dev/null 2>&1 &
+  fi
+  say "Starting… your browser will open at $URL (Ctrl-C stops the app)."
   exec node dist/server.js
 fi

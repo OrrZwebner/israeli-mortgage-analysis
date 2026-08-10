@@ -15,22 +15,71 @@ This plugin extracts every figure from the bank's own statements, **verifies the
 | **A** | `אישור יתרות משכנתא` / `נתונים לסילוק מלא` / `לוח סילוקין` | `ניתוח משכנתא וכדאיות למחזור` — per-track diagnosis, refinancing priority, target terms to demand, action items |
 | **B** | The above **plus** `אישור עקרוני להלוואה לדיור` | Full opinion — recommendation, small-print findings, economic analysis at the borrower's actual horizon, stress tests, exit-station plan, action items |
 
-## Installation
+## Quick start — the dashboard (no coding needed)
 
-**There are four separate ways to install this. They are alternatives — pick the one that matches how you use Claude, and ignore the others.**
+A web page on your own computer: drag the bank PDFs in, press one button, get the report. Your documents never leave your machine. This is the easiest way to use this project, whether or not you write code — the only requirement is a **paid Claude plan**.
+
+![The dashboard](docs/screenshot-desktop.png)
+
+There are two one-time setup steps (1–2), then starting the app (3). Everything below is typed into the **Terminal** app — on a Mac, press `⌘`+`Space`, type `terminal`, press Enter. Copy-paste each block as-is.
+
+**Step 1 — install Node.js** (the engine the app runs on). Go to [nodejs.org](https://nodejs.org), download it, and install it like any other app. To check it worked, paste this in Terminal — any number 20 or higher is fine:
+
+```bash
+node --version
+```
+
+**Step 2 — log in to Claude.** Paste these two lines, one at a time:
+
+```bash
+npm install -g @anthropic-ai/claude-code
+claude
+```
+
+When Claude opens, type `/login` and press Enter — your browser opens, you log in with your Claude account, and you're done. Type `exit` to leave. You will never need to do this again.
+
+**Step 3 — get the app and start it.** Paste:
+
+```bash
+git clone https://github.com/OrrZwebner/israeli-mortgage-analysis
+cd israeli-mortgage-analysis
+./run.sh
+```
+
+> If a window pops up asking to install *command line developer tools*, click **Install**, wait for it to finish, and paste the block again.
+
+The script installs what it needs (first run only), checks everything, and opens your browser at the dashboard. If something is missing, it stops and tells you exactly what to do — fix that one thing and run `./run.sh` again.
+
+Then: **drag the bank PDFs into the page and press התחל ניתוח.** The analysis takes a few minutes; you can watch every step in the log. When it finishes, the Hebrew report appears on the page.
+
+**From then on**, starting the app is just:
+
+```bash
+cd israeli-mortgage-analysis
+./run.sh
+```
+
+**Want it on your phone?** Start with `./run.sh --mobile` instead and scan the QR code it prints (phone and computer on the same Wi-Fi).
+
+**Want the downloadable PDF too?** Install [pandoc](https://pandoc.org/installing.html) (`brew install pandoc`, or the installer on that page). Without it everything still works — the report displays in the browser and you can print it to PDF from there.
+
+Full walkthrough, troubleshooting, and what the app is permitted to do: [`web/README.md`](web/README.md).
+
+## Other ways to use it
+
+The skill also works conversationally inside Claude itself — no dashboard, you attach the PDFs to a chat and ask. Pick the option that matches how you use Claude:
 
 | How you use Claude | Use |
 |---|---|
 | In the browser at **claude.ai**, or the Claude desktop app | **Option A** — upload one file, no terminal |
 | In **Claude Code** (terminal) | **Option B** — install as a plugin |
 | In **Claude Code**, and you want the skill without the plugin wrapper | **Option C** — copy the skill folder |
-| You'd rather drop the PDFs on a web page than type a prompt | **Option D** — run the local dashboard |
 
 ---
 
 ### Option A — claude.ai or the Claude app · no terminal
 
-The route for non-technical users. You never open a terminal and never install Claude Code. Requires a paid Claude plan.
+You never open a terminal and never install anything on your computer. Requires a paid Claude plan.
 
 1. Download **`mortgage-refinance-analysis.zip`** from the [latest release](../../releases/latest). Don't unzip it.
 2. Go to **claude.ai** → **Customize** in the left sidebar → **Skills**.
@@ -61,31 +110,9 @@ Run these two commands inside Claude Code. Nothing to download by hand.
 
 If you'd rather not add a marketplace, copy `skills/mortgage-refinance-analysis/` into `~/.claude/skills/` (personal) or `.claude/skills/` (one project). Same skill as Option B, without the plugin wrapper or its updates.
 
----
-
-### Option D — a local web dashboard
-
-Drop the PDFs on a page, watch the analysis run, read the report in the browser. Runs on your own machine against your own Claude login; nothing is deployed and the documents never leave your disk.
-
-![The dashboard](docs/screenshot-desktop.png)
-
-You need [Node 20+](https://nodejs.org), a logged-in [Claude Code](https://code.claude.com/docs) (`claude` → `/login`), and `pandoc` (`brew install pandoc`) for the PDF. Then one script does everything — installs, checks, starts:
-
-```bash
-git clone https://github.com/OrrZwebner/israeli-mortgage-analysis
-cd israeli-mortgage-analysis
-./run.sh
-```
-
-Open **http://127.0.0.1:5173**, drag the PDFs in, press **התחל ניתוח**. If a prerequisite is missing, the script stops and tells you which one, with the install command.
-
-To use it from your phone on the same Wi-Fi, start with `./run.sh --mobile` and scan the QR code it prints.
-
-Full walkthrough, troubleshooting, configuration, and what the agent is permitted to do: [`web/README.md`](web/README.md).
-
 ## Usage
 
-With the dashboard (Option D) there is nothing to type — drag the PDFs in and press the button. With Options A–C the skill is conversational: attach the PDFs and ask in either language:
+With the dashboard there is nothing to type — drag the PDFs in and press the button. With Options A–C the skill is conversational: attach the PDFs and ask in either language:
 
 ```
 מצורפים אישורי יתרות של המשכנתא שלי — תנתח ותגיד אם כדאי למחזר
@@ -122,7 +149,7 @@ skills/mortgage-refinance-analysis/
     ├── mortgage_calc.py       calculations and extraction verification
     └── build_pdf.py           Hebrew Markdown to styled RTL A4 PDF
 
-run.sh                         one-command launcher for the dashboard (Option D)
+run.sh                         one-command launcher for the dashboard
 web/                           the dashboard itself — Agent SDK + Express + one HTML page
 ├── src/                       agent wiring, permission gate, preflight checks
 └── public/                    the page itself
