@@ -18,6 +18,11 @@ const el = {
   chat: $("chat"),
   chatInput: $("chat-input"),
   chatSend: $("chat-send"),
+  phoneButton: $("phone-button"),
+  phoneDialog: $("phone-dialog"),
+  phoneClose: $("phone-close"),
+  phoneUrl: $("phone-url"),
+  qr: $("qr"),
 };
 
 const state = {
@@ -65,6 +70,28 @@ async function loadDoctor() {
     el.doctor.textContent = "בדיקת סביבה נכשלה";
   }
 }
+
+/* ---------------- phone pairing ---------------- */
+
+async function loadMobile() {
+  try {
+    const res = await fetch("/api/mobile");
+    const data = await res.json();
+    if (!data.enabled) return;
+    el.qr.innerHTML = data.qr;
+    el.phoneUrl.textContent = data.url;
+    el.phoneButton.hidden = false;
+  } catch {
+    /* phone pairing is optional; a failure here changes nothing else */
+  }
+}
+
+el.phoneButton.addEventListener("click", () => el.phoneDialog.showModal());
+el.phoneClose.addEventListener("click", () => el.phoneDialog.close());
+el.phoneDialog.addEventListener("click", (event) => {
+  // Backdrop click: the dialog element itself is the backdrop hit target.
+  if (event.target === el.phoneDialog) el.phoneDialog.close();
+});
 
 /* ---------------- file intake ---------------- */
 
@@ -319,5 +346,6 @@ async function restoreFromUrl() {
 }
 
 loadDoctor();
+loadMobile();
 renderFiles();
 restoreFromUrl();

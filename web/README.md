@@ -17,6 +17,30 @@ npm run doctor     # checks python3, pandoc, a PDF engine, fonts, and your Claud
 npm start          # http://127.0.0.1:5173
 ```
 
+## From your phone
+
+```bash
+npm run mobile
+```
+
+This binds to your LAN instead of loopback and prints a URL and a QR code in the
+terminal; the desktop page also grows a **פתיחה בנייד** button that shows the same QR.
+Scan it from a phone on the same Wi-Fi and you get the full app — attach PDFs from
+Files, watch the run, read the report, ask follow-ups.
+
+The link carries a **one-time access key**, generated fresh on every start. The first
+request exchanges it for an `httpOnly` cookie, so the rest of the session works
+normally; requests from the network without it get a 401, and stopping the server
+revokes every paired phone. Requests from the machine itself are always allowed.
+
+Understand what you're turning on: in mobile mode your mortgage documents, and an
+agent that spends money, are reachable by anything on that network that has the key.
+It's meant for your own home Wi-Fi, not a café or an office LAN. Plain HTTP means the
+key is visible to anyone who can watch the traffic on that network.
+
+The default (`npm start`) stays bound to `127.0.0.1` and is not reachable from
+anywhere else.
+
 `npm run doctor` tells you exactly what is missing. The usual gap on a fresh Mac is
 pandoc:
 
@@ -88,7 +112,8 @@ This is a guard rail, not a sandbox. Read the progress log.
 | Variable | Default | Purpose |
 |---|---|---|
 | `MORTGAGE_WEB_PORT` | `5173` | Listen port |
-| `MORTGAGE_WEB_HOST` | `127.0.0.1` | Bind address |
+| `MORTGAGE_WEB_MOBILE` | unset | `1` binds to the LAN and enables the access key (`npm run mobile`) |
+| `MORTGAGE_WEB_HOST` | `127.0.0.1`, or `0.0.0.0` in mobile mode | Bind address |
 | `MORTGAGE_WEB_MODEL` | `claude-opus-5` | Model |
 | `MORTGAGE_WEB_MAX_BUDGET_USD` | unset | Hard spend ceiling per turn |
 | `MORTGAGE_WEB_BASH_ALLOW` | unset | Extra executables, comma separated |

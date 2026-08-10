@@ -4,16 +4,19 @@ import express from "express";
 import multer from "multer";
 import MarkdownIt from "markdown-it";
 import { runAgent } from "./agent.js";
+import { accessControl, ACCESS_TOKEN } from "./auth.js";
 import {
   HOST,
   MAX_UPLOAD_BYTES,
   MAX_UPLOAD_FILES,
+  MOBILE,
   MODEL,
   PORT,
   RUNS_DIR,
   WEB_ROOT,
 } from "./config.js";
 import { doctor } from "./doctor.js";
+import { lanAddresses, mobileUrl, qrSvg, qrTerminal } from "./net.js";
 import { createJob, getJob, type Job } from "./jobs.js";
 import { buildFollowUpPrompt, buildJobPrompt } from "./prompt.js";
 
@@ -25,6 +28,7 @@ const upload = multer({
 const md = new MarkdownIt({ html: false, linkify: true, breaks: false });
 
 app.use(express.json({ limit: "256kb" }));
+app.use(accessControl);
 app.use(express.static(path.join(WEB_ROOT, "public")));
 
 fs.mkdirSync(RUNS_DIR, { recursive: true });
@@ -68,7 +72,21 @@ function startTurn(job: Job, prompt: string, resume?: string): void {
 }
 
 app.get("/api/doctor", async (_req, res) => {
-  res.json({ ...(await doctor()), model: MODEL });
+  res.json({ ...(await doctor()), model: MODEL, mobile: MOBILE });
+});
+
+/** Powers the "open on my phone" QR in the desktop UI. */
+app.get("/api/mobile", async (_req, res) => {
+  const url = mobileUrl();
+  if (!MOBILE) {
+    res.json({ enabled: false, reason: "not-started-in-mobile-mode" });
+    return;
+  }
+  if (!url) {
+    res.json({ enabled: false, reason: "no-lan-address" });
+    return;
+  }
+  res.json({ enabled: true, url, qr: await qrSvg(url) });
 });
 
 app.post("/api/jobs", upload.array("files"), (req, res) => {
@@ -231,8 +249,30 @@ app.use(
   },
 );
 
-app.listen(PORT, HOST, () => {
-  console.log(`\n  ניתוח משכנתא — http://${HOST}:${PORT}`);
+app.listen(PORT, HOST, async () => {
+  const local = `http://127.0.0.1:${PORT}`;
+  console.log(`\n  ניתוח משכנתא — ${local}`);
   console.log(`  model: ${MODEL}`);
-  console.log(`  runs:  ${RUNS_DIR}\n`);
+  console.log(`  runs:  ${RUNS_DIR}`);
+
+  if (!MOBILE) {
+    console.log("\n  Phone access is off. Start with `npm run mobile` to enable it.\n");
+    return;
+  }
+
+  const url = mobileUrl();
+  if (!url) {
+    console.log("\n  Mobile mode is on, but no LAN address was found on this machine.\n");
+    return;
+  }
+
+  console.log("\n  Phone access is ON — this machine is reachable on your network.");
+  console.log(`  Open on your phone (same Wi-Fi):\n\n  ${url}\n`);
+  console.log(await qrTerminal(url));
+  const others = lanAddresses().slice(1);
+  if (others.length) console.log(`  other addresses: ${others.join(", ")}`);
+  console.log(
+    `  The link contains a one-time access key. It stops working when this server stops.\n`,
+  );
+  if (!ACCESS_TOKEN) console.log("  (warning: no access token was generated)\n");
 });

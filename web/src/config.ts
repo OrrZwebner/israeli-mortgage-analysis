@@ -22,7 +22,15 @@ export const SKILL_NAME = "mortgage-refinance-analysis";
 export const QUALIFIED_SKILL = `${PLUGIN_NAME}:${SKILL_NAME}`;
 
 export const PORT = Number(process.env.MORTGAGE_WEB_PORT ?? 5173);
-export const HOST = process.env.MORTGAGE_WEB_HOST ?? "127.0.0.1";
+
+/**
+ * Mobile mode listens on every interface so a phone on the same Wi-Fi can reach
+ * the app. That also exposes your mortgage documents — and an agent that spends
+ * money — to everyone on the network, so it is opt-in and gated by a token that
+ * is regenerated on every start (see `src/auth.ts`).
+ */
+export const MOBILE = process.env.MORTGAGE_WEB_MOBILE === "1";
+export const HOST = process.env.MORTGAGE_WEB_HOST ?? (MOBILE ? "0.0.0.0" : "127.0.0.1");
 export const MODEL = process.env.MORTGAGE_WEB_MODEL ?? "claude-opus-5";
 
 /**

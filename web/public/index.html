@@ -2,7 +2,11 @@
 <html lang="he" dir="rtl">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#123a6b" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="משכנתא" />
     <title>ניתוח משכנתא וכדאיות למחזור</title>
     <link rel="stylesheet" href="/styles.css" />
     <link
@@ -19,20 +23,35 @@
           <p class="sub">מקומי בלבד · המסמכים לא יוצאים מהמחשב הזה</p>
         </div>
       </div>
-      <div id="doctor" class="doctor" title="בדיקת סביבה"></div>
+      <div class="topbar-end">
+        <button id="phone-button" class="phone-button" hidden>פתיחה בנייד</button>
+        <div id="doctor" class="doctor" title="בדיקת סביבה"></div>
+      </div>
     </header>
+
+    <dialog id="phone-dialog" class="phone-dialog">
+      <h2>פתיחה בטלפון</h2>
+      <p class="muted">סרקו את הקוד מהטלפון. הטלפון והמחשב צריכים להיות על אותה רשת Wi-Fi.</p>
+      <div id="qr" class="qr"></div>
+      <code id="phone-url" class="phone-url"></code>
+      <p class="muted">
+        הקישור מכיל מפתח גישה חד-פעמי שנוצר מחדש בכל הפעלה של השרת, ומפסיק לעבוד כשהשרת נסגר.
+      </p>
+      <button id="phone-close" class="ghost">סגירה</button>
+    </dialog>
 
     <main class="grid">
       <section class="col">
         <div class="card" id="intake">
           <h2>1 · צירוף מסמכים</h2>
           <div id="dropzone" class="dropzone" tabindex="0" role="button">
-            <strong>גררו לכאן קבצי PDF</strong>
+            <strong class="pointer-only">גררו לכאן קבצי PDF</strong>
+            <strong class="touch-only">בחרו קבצי PDF</strong>
             <span
               >אישור יתרות · נתונים לסילוק מלא · לוח סילוקין · דוח משכנתא · אישור
               עקרוני</span
             >
-            <span class="hint">או לחצו לבחירה</span>
+            <span class="hint pointer-only">או לחצו לבחירה</span>
             <input id="file-input" type="file" accept="application/pdf,.pdf" multiple hidden />
           </div>
           <ul id="filelist" class="filelist"></ul>
@@ -50,7 +69,7 @@
           <p id="intake-error" class="error" hidden></p>
         </div>
 
-        <div class="card grow">
+        <div class="card grow" id="log-card">
           <h2>2 · מהלך הניתוח</h2>
           <div id="log" class="log">
             <p class="placeholder">כאן יופיע כל צעד: איזה מסמך נקרא, אילו נתוני שוק נאספו, ומה נכתב.</p>

@@ -38,6 +38,14 @@ body {
   font-family: "Segoe UI", "Noto Sans Hebrew", "Arial Hebrew", Arial, sans-serif;
   font-size: 15px;
   line-height: 1.55;
+  -webkit-text-size-adjust: 100%;
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* Swapped by the touch media query at the bottom of this file. */
+.touch-only {
+  display: none;
 }
 
 /* ---------- top bar ---------- */
@@ -58,6 +66,14 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
+  /* Flex items default to min-width:auto, which refuses to shrink below their
+     content and pushes the whole page wider than a phone screen. */
+  min-width: 0;
+}
+
+.brand h1,
+.brand .sub {
+  overflow-wrap: anywhere;
 }
 
 .mark {
@@ -84,10 +100,71 @@ body {
   opacity: 0.8;
 }
 
+.topbar-end {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.phone-button {
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #fff;
+  padding: 6px 14px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.phone-button:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.phone-dialog {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+  max-width: 340px;
+  text-align: center;
+  color: var(--ink);
+}
+
+.phone-dialog::backdrop {
+  background: rgba(13, 44, 82, 0.45);
+}
+
+.phone-dialog h2 {
+  margin: 0 0 6px;
+  font-size: 16px;
+  color: var(--navy);
+}
+
+.qr {
+  margin: 12px auto;
+  width: 200px;
+}
+
+.qr svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.phone-url {
+  display: block;
+  direction: ltr;
+  font-size: 11.5px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+  margin-bottom: 10px;
+}
+
 .doctor {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
+  min-width: 0;
 }
 
 .pill {
@@ -162,6 +239,142 @@ body {
 @media (max-width: 1000px) {
   .grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- phones ----------
+   One column, and the cards are re-ordered so the reading order matches the
+   numbered steps: attach → progress → report → follow-up. `display: contents`
+   dissolves the two layout columns so every card is a sibling and can be
+   ordered independently. */
+@media (max-width: 700px) {
+  .grid {
+    display: flex;
+    flex-direction: column;
+    /* The desktop rule sets align-items:start, which in a *column* flex box is
+       the horizontal axis — cards would shrink to their content width. */
+    align-items: stretch;
+    gap: 12px;
+    padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
+  }
+
+  .col {
+    display: contents;
+  }
+
+  #intake {
+    order: 1;
+  }
+  #log-card {
+    order: 2;
+  }
+  #report-card {
+    order: 3;
+  }
+  #chat-card {
+    order: 4;
+  }
+
+  .topbar {
+    padding: 10px 14px calc(10px);
+    gap: 10px;
+  }
+
+  .topbar h1 {
+    font-size: 16px;
+  }
+
+  .sub {
+    display: none;
+  }
+
+  /* The pills become one horizontally scrollable strip on its own row, so a
+     long list can't widen the page. */
+  .topbar-end {
+    flex: 1 1 100%;
+    justify-content: space-between;
+  }
+
+  .doctor {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+
+  .pill {
+    white-space: nowrap;
+  }
+
+  .doctor::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Pointless on the device you already opened it on. */
+  .phone-button {
+    display: none;
+  }
+
+  .card {
+    padding: 14px;
+  }
+
+  .dropzone {
+    padding: 18px 12px;
+  }
+
+  .pointer-only {
+    display: none;
+  }
+
+  .touch-only {
+    display: block;
+  }
+
+  /* 16px keeps iOS from zooming the viewport when a field takes focus. */
+  .note,
+  #chat input {
+    font-size: 16px;
+  }
+
+  button.primary,
+  button.ghost,
+  #chat input,
+  .tabs button,
+  .dl {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .row {
+    flex-wrap: wrap;
+  }
+
+  button.primary {
+    flex: 1;
+  }
+
+  .report-head {
+    align-items: flex-start;
+  }
+
+  .tabs {
+    flex-wrap: wrap;
+  }
+
+  /* The log stays a scrolling feed; the report reads better as page scroll. */
+  .log {
+    max-height: 45vh;
+  }
+
+  .report {
+    max-height: none;
+  }
+
+  .filelist span {
+    max-width: 60vw;
   }
 }
 
