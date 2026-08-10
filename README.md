@@ -17,7 +17,7 @@ This plugin extracts every figure from the bank's own statements, **verifies the
 
 ## Installation
 
-**There are three separate ways to install this. They are alternatives — pick the one that matches how you use Claude, and ignore the other two.**
+**There are four separate ways to install this. They are alternatives — pick the one that matches how you use Claude, and ignore the others.**
 
 | How you use Claude | Use |
 |---|---|
@@ -67,17 +67,25 @@ If you'd rather not add a marketplace, copy `skills/mortgage-refinance-analysis/
 
 Drop the PDFs on a page, watch the analysis run, read the report in the browser. Runs on your own machine against your own Claude login; nothing is deployed and the documents never leave your disk.
 
+![The dashboard](docs/screenshot-desktop.png)
+
+You need [Node 20+](https://nodejs.org), a logged-in [Claude Code](https://code.claude.com/docs) (`claude` → `/login`), and `pandoc` (`brew install pandoc`) for the PDF. Then one script does everything — installs, checks, starts:
+
 ```bash
 git clone https://github.com/OrrZwebner/israeli-mortgage-analysis
-cd israeli-mortgage-analysis/web
-npm install && npm run doctor && npm start
+cd israeli-mortgage-analysis
+./run.sh
 ```
 
-Full setup, configuration, and what the agent is permitted to do: [`web/README.md`](web/README.md).
+Open **http://127.0.0.1:5173**, drag the PDFs in, press **התחל ניתוח**. If a prerequisite is missing, the script stops and tells you which one, with the install command.
+
+To use it from your phone on the same Wi-Fi, start with `./run.sh --mobile` and scan the QR code it prints.
+
+Full walkthrough, troubleshooting, configuration, and what the agent is permitted to do: [`web/README.md`](web/README.md).
 
 ## Usage
 
-Attach the PDFs and ask in either language:
+With the dashboard (Option D) there is nothing to type — drag the PDFs in and press the button. With Options A–C the skill is conversational: attach the PDFs and ask in either language:
 
 ```
 מצורפים אישורי יתרות של המשכנתא שלי — תנתח ותגיד אם כדאי למחזר
@@ -114,7 +122,8 @@ skills/mortgage-refinance-analysis/
     ├── mortgage_calc.py       calculations and extraction verification
     └── build_pdf.py           Hebrew Markdown to styled RTL A4 PDF
 
-web/                           local dashboard (Option D) — Agent SDK + Express + one HTML page
+run.sh                         one-command launcher for the dashboard (Option D)
+web/                           the dashboard itself — Agent SDK + Express + one HTML page
 ├── src/                       agent wiring, permission gate, preflight checks
 └── public/                    the page itself
 ```
