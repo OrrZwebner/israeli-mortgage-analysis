@@ -1,0 +1,523 @@
+/* Palette deliberately mirrors the PDF the skill renders: navy + gold. */
+:root {
+  --navy: #123a6b;
+  --navy-deep: #0d2c52;
+  --navy-soft: #2c4f7c;
+  --gold: #c9a227;
+  --ink: #1b1b1b;
+  --muted: #5c6b7f;
+  --line: #d8dee6;
+  --panel: #ffffff;
+  --bg: #eef2f7;
+  --ok: #1f7a4d;
+  --warn: #a16207;
+  --fail: #b02a2a;
+  --radius: 10px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* `hidden` has to beat the display rules below, or hidden flex rows still show. */
+[hidden] {
+  display: none !important;
+}
+
+html,
+body {
+  margin: 0;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Segoe UI", "Noto Sans Hebrew", "Arial Hebrew", Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+/* ---------- top bar ---------- */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 14px 22px;
+  background: var(--navy);
+  color: #fff;
+  border-bottom: 3px solid var(--gold);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mark {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+  background: var(--gold);
+  color: var(--navy-deep);
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.topbar h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.sub {
+  margin: 0;
+  font-size: 12.5px;
+  opacity: 0.8;
+}
+
+.doctor {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.pill {
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: rgba(255, 255, 255, 0.14);
+  cursor: help;
+}
+
+.pill.ok::before {
+  content: "● ";
+  color: #7ee0a8;
+}
+.pill.warn::before {
+  content: "● ";
+  color: #f2c14e;
+}
+.pill.fail::before {
+  content: "● ";
+  color: #ff9a9a;
+}
+
+/* ---------- layout ---------- */
+
+/* The page scrolls; the log and the report get their own scroll panes. A
+   fixed-height app shell overlaps its own cards on a short window. */
+.grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(340px, 1fr) minmax(360px, 1.15fr);
+  align-items: start;
+  gap: 16px;
+  padding: 16px 22px 22px;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+}
+
+.card.grow {
+  flex: 1;
+}
+
+.card h2 {
+  margin: 0;
+  font-size: 14px;
+  color: var(--navy);
+  border-right: 4px solid var(--gold);
+  padding-right: 8px;
+}
+
+.muted {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+@media (max-width: 1000px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- intake ---------- */
+
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 22px 14px;
+  text-align: center;
+  border: 2px dashed #b9c6d6;
+  border-radius: var(--radius);
+  background: #f8fafd;
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.dropzone strong {
+  color: var(--navy);
+  font-size: 15px;
+}
+
+.dropzone .hint {
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+.dropzone:hover,
+.dropzone:focus-visible,
+.dropzone.over {
+  border-color: var(--gold);
+  background: #fdf8e8;
+  outline: none;
+}
+
+.filelist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.filelist li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #eef2f7;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 12.5px;
+  max-width: 100%;
+}
+
+.filelist span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 240px;
+}
+
+.filelist button {
+  border: 0;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+  padding: 0;
+}
+
+.note {
+  width: 100%;
+  resize: vertical;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font: inherit;
+  font-size: 13.5px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+button,
+.dl {
+  font: inherit;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+button.primary {
+  background: var(--navy);
+  color: #fff;
+  border: 1px solid var(--navy);
+  padding: 8px 18px;
+  font-weight: 600;
+}
+
+button.primary:hover:not(:disabled) {
+  background: var(--navy-deep);
+}
+
+button.primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+button.ghost {
+  background: #fff;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  padding: 7px 14px;
+}
+
+.elapsed {
+  color: var(--muted);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.error {
+  margin: 0;
+  color: var(--fail);
+  font-size: 13px;
+}
+
+#chat input {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font: inherit;
+  font-size: 13.5px;
+}
+
+#chat input:disabled {
+  background: #f4f6f9;
+}
+
+/* ---------- progress log ---------- */
+
+.log {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 180px;
+  max-height: 52vh;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-left: 4px;
+}
+
+.placeholder {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 0;
+}
+
+.entry {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px;
+  align-items: start;
+  font-size: 13px;
+  padding: 5px 8px;
+  border-radius: 7px;
+  background: #f8fafd;
+  border-right: 3px solid var(--line);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.entry .icon {
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+.entry.assistant {
+  background: #fff;
+  border-right-color: var(--navy);
+}
+.entry.tool {
+  color: var(--navy-soft);
+  border-right-color: #9db4d2;
+}
+.entry.init {
+  border-right-color: var(--gold);
+  background: #fdf8e8;
+}
+.entry.result {
+  border-right-color: var(--ok);
+  background: #f1f9f4;
+}
+.entry.denied {
+  border-right-color: var(--warn);
+  background: #fdf6e7;
+  color: var(--warn);
+}
+.entry.error {
+  border-right-color: var(--fail);
+  background: #fdf1f1;
+  color: var(--fail);
+}
+.entry.user {
+  border-right-color: var(--navy-deep);
+  background: #eef2f7;
+  font-weight: 600;
+}
+
+/* ---------- report ---------- */
+
+.report-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.tabs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tabs button {
+  background: #fff;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  padding: 4px 12px;
+  font-size: 12.5px;
+}
+
+.tabs button.active {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: #fff;
+}
+
+.dl {
+  text-decoration: none;
+  background: #fff;
+  border: 1px solid var(--gold);
+  color: var(--navy-deep);
+  padding: 4px 12px;
+  font-size: 12.5px;
+}
+
+.dl:hover {
+  background: #fdf8e8;
+}
+
+.report {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 220px;
+  max-height: 78vh;
+  padding: 4px 6px 4px 2px;
+}
+
+.report pre.raw {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 12.5px;
+  margin: 0;
+}
+
+/* Rendered Markdown — echoes the PDF stylesheet in build_pdf.py. */
+.md h1 {
+  font-size: 21px;
+  color: var(--navy);
+  border-bottom: 3px solid var(--navy);
+  padding-bottom: 6px;
+  margin: 0 0 12px;
+}
+.md h2 {
+  font-size: 17px;
+  color: var(--navy);
+  border-right: 5px solid var(--gold);
+  padding-right: 9px;
+  margin: 20px 0 8px;
+}
+.md h3 {
+  font-size: 15px;
+  color: var(--navy-soft);
+  margin: 14px 0 6px;
+}
+.md p {
+  margin: 6px 0;
+}
+.md table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 10px 0 14px;
+  font-size: 13px;
+}
+.md th {
+  background: var(--navy);
+  color: #fff;
+  padding: 6px 7px;
+  text-align: right;
+  border: 1px solid var(--navy);
+}
+.md td {
+  border: 1px solid #c8d2df;
+  padding: 5px 7px;
+  text-align: right;
+  vertical-align: top;
+}
+.md tbody tr:nth-child(even) td {
+  background: #f2f6fa;
+}
+.md blockquote {
+  border-right: 4px solid var(--gold);
+  background: #fdf8e8;
+  margin: 10px 0;
+  padding: 8px 12px;
+}
+.md ul,
+.md ol {
+  margin: 6px 22px 6px 0;
+  padding: 0;
+}
+.md li {
+  margin: 3px 0;
+}
+.md hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 16px 0;
+}
+.md strong {
+  color: var(--navy-deep);
+}
+.md code {
+  background: #eef2f7;
+  padding: 1px 4px;
+  border-radius: 4px;
+  font-size: 12.5px;
+}
+
+footer {
+  padding: 10px 22px 16px;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+}

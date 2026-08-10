@@ -69,7 +69,7 @@ Full section-by-section structure, including which sections are Mode A vs Mode B
 ## Scripts
 
 - `scripts/mortgage_calc.py` — Spitzer payments, index coefficients, remaining balances, effective nominal rate for index-linked tracks, prepayment fee checks, delay cost, break-even anchor. Run `python scripts/mortgage_calc.py --help` for the subcommands.
-- `scripts/build_pdf.py` — renders a Hebrew Markdown report to a styled RTL A4 PDF via pandoc + wkhtmltopdf. Handles the glyph substitutions that would otherwise render as black boxes.
+- `scripts/build_pdf.py` — renders a Hebrew Markdown report to a styled RTL A4 PDF via pandoc plus a PDF engine (wkhtmltopdf if installed, otherwise headless Chrome/Chromium/Edge). Handles the glyph substitutions that would otherwise render as black boxes.
 
 ## Tone
 

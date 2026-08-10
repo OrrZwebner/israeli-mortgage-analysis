@@ -3,11 +3,15 @@
 
     python build_pdf.py report.md report.pdf
 
-Pipeline: markdown -> HTML (pandoc) -> PDF (wkhtmltopdf), wrapped in an RTL
-template with a Hebrew-capable font.
+Pipeline: markdown -> HTML (pandoc) -> PDF (wkhtmltopdf, or headless Chrome),
+wrapped in an RTL template with a Hebrew-capable font.
 
-Requirements: pandoc, wkhtmltopdf, and a font covering Hebrew (DejaVu Sans on
-most Linux images). Check with:
+Requirements: pandoc, a PDF engine, and a font covering Hebrew (DejaVu Sans on
+most Linux images). The PDF engine is chosen automatically: wkhtmltopdf if it is
+installed, otherwise any Chromium-family browser (Chrome, Chromium, Edge, Brave)
+found on PATH, at the usual macOS/Linux install locations, or named by the
+CHROME_PATH environment variable. Both engines honour the @page rule below, so
+they produce the same page geometry. Force one with --engine. Check with:
     which pandoc wkhtmltopdf && fc-list :lang=he | head
 
 Some glyphs commonly used in Markdown have no coverage in the available fonts
@@ -16,6 +20,7 @@ GLYPH_SUBSTITUTIONS if new ones appear.
 """
 
 import argparse
+import os
 import pathlib
 import shutil
 import subprocess
@@ -33,6 +38,23 @@ GLYPH_SUBSTITUTIONS = {
     "\u00d7": "x",
     "\u2014": "\u2013",   # em dash renders inconsistently; use en dash
 }
+
+# Chromium-family binaries, in preference order. PATH names first, then the
+# standard install locations on macOS and Linux.
+CHROME_CANDIDATES = (
+    "google-chrome",
+    "google-chrome-stable",
+    "chromium",
+    "chromium-browser",
+    "microsoft-edge",
+    "brave-browser",
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    "/Applications/Chromium.app/Contents/MacOS/Chromium",
+    "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
+    "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+    "/opt/google/chrome/chrome",
+    "/snap/bin/chromium",
+)
 
 CSS = """
 @page { size: A4; margin: 18mm 15mm 20mm 15mm; }
@@ -68,15 +90,84 @@ TEMPLATE = """<!DOCTYPE html>
 <title>{title}</title><style>{css}</style></head>
 <body>{body}</body></html>"""
 
+INSTALL_HINT = """no PDF engine found. Install either:
+  wkhtmltopdf  -  apt-get install wkhtmltopdf
+  Google Chrome -  https://www.google.com/chrome/  (macOS: brew install --cask google-chrome)
+Or point CHROME_PATH at an existing Chromium-family binary."""
+
 
 def require(tool):
     if shutil.which(tool) is None:
         sys.exit(f"missing required tool: {tool}")
 
 
-def build(md_path: pathlib.Path, pdf_path: pathlib.Path, title: str = "report") -> None:
+def find_chrome():
+    """Return a path to a Chromium-family binary, or None."""
+    override = os.environ.get("CHROME_PATH")
+    if override:
+        resolved = shutil.which(override) or (override if os.path.isfile(override) else None)
+        if resolved is None:
+            sys.exit(f"CHROME_PATH does not point at an executable: {override}")
+        return resolved
+    for candidate in CHROME_CANDIDATES:
+        resolved = shutil.which(candidate)
+        if resolved:
+            return resolved
+        if os.path.isfile(candidate) and os.access(candidate, os.X_OK):
+            return candidate
+    return None
+
+
+def resolve_engine(engine):
+    """Map the --engine choice to ('wkhtmltopdf', path) or ('chrome', path)."""
+    if engine in ("auto", "wkhtmltopdf"):
+        found = shutil.which("wkhtmltopdf")
+        if found:
+            return "wkhtmltopdf", found
+        if engine == "wkhtmltopdf":
+            sys.exit("missing required tool: wkhtmltopdf")
+    if engine in ("auto", "chrome"):
+        found = find_chrome()
+        if found:
+            return "chrome", found
+        if engine == "chrome":
+            sys.exit("no Chromium-family browser found. Set CHROME_PATH to one.")
+    sys.exit(INSTALL_HINT)
+
+
+def render_wkhtmltopdf(binary, html_path, pdf_path):
+    subprocess.run(
+        [binary, "--encoding", "utf-8", "--enable-local-file-access",
+         "-q", str(html_path), str(pdf_path)],
+        check=True,
+    )
+
+
+def render_chrome(binary, html_path, pdf_path, profile_dir):
+    argv = [
+        binary,
+        "--headless=new",
+        "--disable-gpu",
+        "--no-pdf-header-footer",
+        "--run-all-compositor-stages-before-draw",
+        "--virtual-time-budget=10000",
+        f"--user-data-dir={profile_dir}",
+        f"--print-to-pdf={pdf_path}",
+    ]
+    # Chrome refuses to start as root without this, which is the common case
+    # inside containers and CI images.
+    if hasattr(os, "geteuid") and os.geteuid() == 0:
+        argv.insert(1, "--no-sandbox")
+    argv.append(html_path.as_uri())
+    subprocess.run(argv, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    if not pdf_path.exists():
+        sys.exit(f"{binary} did not produce {pdf_path}")
+
+
+def build(md_path: pathlib.Path, pdf_path: pathlib.Path, title: str = "report",
+          engine: str = "auto") -> None:
     require("pandoc")
-    require("wkhtmltopdf")
+    engine_kind, engine_path = resolve_engine(engine)
 
     source = md_path.read_text(encoding="utf-8")
     for bad, good in GLYPH_SUBSTITUTIONS.items():
@@ -100,13 +191,12 @@ def build(md_path: pathlib.Path, pdf_path: pathlib.Path, title: str = "report") 
             encoding="utf-8",
         )
         pdf_path.parent.mkdir(parents=True, exist_ok=True)
-        subprocess.run(
-            ["wkhtmltopdf", "--encoding", "utf-8", "--enable-local-file-access",
-             "-q", str(full_html), str(pdf_path)],
-            check=True,
-        )
+        if engine_kind == "wkhtmltopdf":
+            render_wkhtmltopdf(engine_path, full_html, pdf_path)
+        else:
+            render_chrome(engine_path, full_html, pdf_path, tmp / "chrome-profile")
 
-    print(f"wrote {pdf_path}")
+    print(f"wrote {pdf_path} ({engine_kind})")
 
 
 def main():
@@ -115,8 +205,10 @@ def main():
     ap.add_argument("markdown")
     ap.add_argument("pdf")
     ap.add_argument("--title", default="mortgage report")
+    ap.add_argument("--engine", default="auto", choices=["auto", "wkhtmltopdf", "chrome"],
+                    help="PDF engine (default: auto - wkhtmltopdf, else headless Chrome)")
     a = ap.parse_args()
-    build(pathlib.Path(a.markdown), pathlib.Path(a.pdf), a.title)
+    build(pathlib.Path(a.markdown), pathlib.Path(a.pdf), a.title, a.engine)
 
 
 if __name__ == "__main__":

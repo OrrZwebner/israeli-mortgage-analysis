@@ -24,6 +24,7 @@ This plugin extracts every figure from the bank's own statements, **verifies the
 | In the browser at **claude.ai**, or the Claude desktop app | **Option A** — upload one file, no terminal |
 | In **Claude Code** (terminal) | **Option B** — install as a plugin |
 | In **Claude Code**, and you want the skill without the plugin wrapper | **Option C** — copy the skill folder |
+| You'd rather drop the PDFs on a web page than type a prompt | **Option D** — run the local dashboard |
 
 ---
 
@@ -41,7 +42,7 @@ Then start a new chat, attach your mortgage PDFs, and ask in Hebrew — see [Usa
 
 **Which files to attach** — ask your bank for `אישור יתרות משכנתא` or `נתונים לסילוק מלא`, one per file number (`תיק`). Add the refinancing offer (`אישור עקרוני להלוואה לדיור`) if you have one, and you get the fuller Mode B opinion.
 
-**About the PDF** — the Hebrew report always works. The styled RTL PDF needs `pandoc` and `wkhtmltopdf` in the runtime, which is not guaranteed on claude.ai. If it fails, the Markdown report is complete on its own and you can print it to PDF from your browser.
+**About the PDF** — the Hebrew report always works. The styled RTL PDF needs `pandoc` plus a PDF engine (`wkhtmltopdf`, or any Chromium-family browser) in the runtime, which is not guaranteed on claude.ai. If it fails, the Markdown report is complete on its own and you can print it to PDF from your browser.
 
 ---
 
@@ -59,6 +60,20 @@ Run these two commands inside Claude Code. Nothing to download by hand.
 ### Option C — Claude Code, as a standalone skill
 
 If you'd rather not add a marketplace, copy `skills/mortgage-refinance-analysis/` into `~/.claude/skills/` (personal) or `.claude/skills/` (one project). Same skill as Option B, without the plugin wrapper or its updates.
+
+---
+
+### Option D — a local web dashboard
+
+Drop the PDFs on a page, watch the analysis run, read the report in the browser. Runs on your own machine against your own Claude login; nothing is deployed and the documents never leave your disk.
+
+```bash
+git clone https://github.com/OrrZwebner/israeli-mortgage-analysis
+cd israeli-mortgage-analysis/web
+npm install && npm run doctor && npm start
+```
+
+Full setup, configuration, and what the agent is permitted to do: [`web/README.md`](web/README.md).
 
 ## Usage
 
@@ -98,6 +113,10 @@ skills/mortgage-refinance-analysis/
 └── scripts/
     ├── mortgage_calc.py       calculations and extraction verification
     └── build_pdf.py           Hebrew Markdown to styled RTL A4 PDF
+
+web/                           local dashboard (Option D) — Agent SDK + Express + one HTML page
+├── src/                       agent wiring, permission gate, preflight checks
+└── public/                    the page itself
 ```
 
 ## Scripts
@@ -119,7 +138,7 @@ python scripts/mortgage_calc.py stress <principal> <rate> <months> <k> --scenari
 python scripts/build_pdf.py report.md report.pdf
 ```
 
-`build_pdf.py` requires `pandoc`, `wkhtmltopdf`, and a Hebrew-capable font (DejaVu Sans on most Linux images).
+`build_pdf.py` requires `pandoc`, a Hebrew-capable font (DejaVu Sans on most Linux images), and a PDF engine. It uses `wkhtmltopdf` when installed and otherwise falls back to headless Chrome, Chromium, Edge, or Brave — found on `PATH`, at the usual macOS/Linux install locations, or via `CHROME_PATH`. Force one with `--engine wkhtmltopdf|chrome`.
 
 ## Scope
 

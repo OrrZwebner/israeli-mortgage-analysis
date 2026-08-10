@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ניתוח משכנתא וכדאיות למחזור</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>"
+    />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="mark">₪</span>
+        <div>
+          <h1>ניתוח משכנתא וכדאיות למחזור</h1>
+          <p class="sub">מקומי בלבד · המסמכים לא יוצאים מהמחשב הזה</p>
+        </div>
+      </div>
+      <div id="doctor" class="doctor" title="בדיקת סביבה"></div>
+    </header>
+
+    <main class="grid">
+      <section class="col">
+        <div class="card" id="intake">
+          <h2>1 · צירוף מסמכים</h2>
+          <div id="dropzone" class="dropzone" tabindex="0" role="button">
+            <strong>גררו לכאן קבצי PDF</strong>
+            <span
+              >אישור יתרות · נתונים לסילוק מלא · לוח סילוקין · דוח משכנתא · אישור
+              עקרוני</span
+            >
+            <span class="hint">או לחצו לבחירה</span>
+            <input id="file-input" type="file" accept="application/pdf,.pdf" multiple hidden />
+          </div>
+          <ul id="filelist" class="filelist"></ul>
+          <textarea
+            id="note"
+            class="note"
+            rows="2"
+            placeholder="הערות (לא חובה) — למשל: הבנק הציע לי מחזור, מה כדאי לדרוש?"
+          ></textarea>
+          <div class="row">
+            <button id="start" class="primary" disabled>התחל ניתוח</button>
+            <button id="cancel" class="ghost" hidden>ביטול</button>
+            <span id="elapsed" class="elapsed"></span>
+          </div>
+          <p id="intake-error" class="error" hidden></p>
+        </div>
+
+        <div class="card grow">
+          <h2>2 · מהלך הניתוח</h2>
+          <div id="log" class="log">
+            <p class="placeholder">כאן יופיע כל צעד: איזה מסמך נקרא, אילו נתוני שוק נאספו, ומה נכתב.</p>
+          </div>
+        </div>
+
+        <div class="card" id="chat-card">
+          <h2>4 · שאלות המשך</h2>
+          <p class="muted">אפשר לשאול על הדוח, או לבקש תיקון — הדוח ייכתב מחדש עם בלוק "מה חדש בגרסה N".</p>
+          <form id="chat" class="row">
+            <input
+              id="chat-input"
+              type="text"
+              placeholder="למשל: כמה עולה לי כל חודש שאני מחכה?"
+              disabled
+            />
+            <button id="chat-send" class="primary" disabled>שליחה</button>
+          </form>
+        </div>
+      </section>
+
+      <section class="col">
+        <div class="card grow" id="report-card">
+          <div class="report-head">
+            <h2>3 · הדוח</h2>
+            <div class="tabs" id="tabs" hidden>
+              <button data-tab="preview" class="active">תצוגה</button>
+              <button data-tab="markdown">Markdown</button>
+              <a id="dl-md" class="dl" download>הורדת .md</a>
+              <a id="dl-pdf" class="dl" download>הורדת PDF</a>
+            </div>
+          </div>
+          <div id="report" class="report">
+            <p class="placeholder">הדוח יופיע כאן ברגע שייכתב.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      ניתוח של המסמכים שסופקו ושל נתוני שוק ציבוריים. אינו ייעוץ פיננסי מורשה.
+    </footer>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>

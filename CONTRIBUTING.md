@@ -35,12 +35,16 @@ otherwise — fix the code, do not update the expectation. If you do need to
 change a fixture, derive the new expectation independently of the script;
 asserting whatever the script currently prints tests nothing.
 
-`scripts/build_pdf.py` additionally needs `pandoc`, `wkhtmltopdf`, and a font
-covering Hebrew. Check with:
+`scripts/build_pdf.py` additionally needs `pandoc`, a font covering Hebrew, and a
+PDF engine — `wkhtmltopdf`, or any Chromium-family browser as a fallback. Check
+with:
 
 ```bash
-which pandoc wkhtmltopdf && fc-list :lang=he | head
+which pandoc wkhtmltopdf google-chrome chromium && fc-list :lang=he | head
 ```
+
+Keep the fallback stdlib-only: it shells out via `shutil.which` and
+`subprocess`, so the no-dependencies rule above still holds.
 
 ## Cutting a release
 
