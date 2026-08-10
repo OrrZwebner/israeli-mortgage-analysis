@@ -17,20 +17,19 @@ This plugin extracts every figure from the bank's own statements, **verifies the
 
 ## Installation
 
-### As a plugin
+**There are three separate ways to install this. They are alternatives — pick the one that matches how you use Claude, and ignore the other two.**
 
-```
-/plugin marketplace add OrrZwebner/israeli-mortgage-analysis
-/plugin install israeli-mortgage-analysis
-```
+| How you use Claude | Use |
+|---|---|
+| In the browser at **claude.ai**, or the Claude desktop app | **Option A** — upload one file, no terminal |
+| In **Claude Code** (terminal) | **Option B** — install as a plugin |
+| In **Claude Code**, and you want the skill without the plugin wrapper | **Option C** — copy the skill folder |
 
-### As a standalone skill
+---
 
-Copy `skills/mortgage-refinance-analysis/` into your skills directory, or upload the packaged `.skill` file.
+### Option A — claude.ai or the Claude app · no terminal
 
-### On claude.ai — no terminal required
-
-No terminal, no Claude Code. Install it as a **skill** instead of a plugin. Requires a paid Claude plan.
+The route for non-technical users. You never open a terminal and never install Claude Code. Requires a paid Claude plan.
 
 1. Download **`mortgage-refinance-analysis.zip`** from the [latest release](../../releases/latest). Don't unzip it.
 2. Go to **claude.ai** → **Customize** in the left sidebar → **Skills**.
@@ -43,6 +42,23 @@ Then start a new chat, attach your mortgage PDFs, and ask in Hebrew — see [Usa
 **Which files to attach** — ask your bank for `אישור יתרות משכנתא` or `נתונים לסילוק מלא`, one per file number (`תיק`). Add the refinancing offer (`אישור עקרוני להלוואה לדיור`) if you have one, and you get the fuller Mode B opinion.
 
 **About the PDF** — the Hebrew report always works. The styled RTL PDF needs `pandoc` and `wkhtmltopdf` in the runtime, which is not guaranteed on claude.ai. If it fails, the Markdown report is complete on its own and you can print it to PDF from your browser.
+
+---
+
+### Option B — Claude Code, as a plugin
+
+Run these two commands inside Claude Code. Nothing to download by hand.
+
+```
+/plugin marketplace add OrrZwebner/israeli-mortgage-analysis
+/plugin install israeli-mortgage-analysis
+```
+
+---
+
+### Option C — Claude Code, as a standalone skill
+
+If you'd rather not add a marketplace, copy `skills/mortgage-refinance-analysis/` into `~/.claude/skills/` (personal) or `.claude/skills/` (one project). Same skill as Option B, without the plugin wrapper or its updates.
 
 ## Usage
 
