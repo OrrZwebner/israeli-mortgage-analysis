@@ -1,0 +1,53 @@
+name: release
+
+# Packages the skill on its own and attaches it to the release, so a
+# non-technical user can download one file and upload it to claude.ai.
+# GitHub's own "Download ZIP" is not usable for this: it contains the whole
+# repository, which buries SKILL.md three levels deep. The archive built here
+# has SKILL.md directly inside a single top-level folder.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build the skill archive
+        run: |
+          cd skills
+          zip -r ../mortgage-refinance-analysis.zip mortgage-refinance-analysis \
+            -x '*.DS_Store' '*__pycache__*' '*.pyc'
+
+      - name: Verify the archive layout
+        run: |
+          unzip -l mortgage-refinance-analysis.zip
+          # SKILL.md must sit directly inside one top-level folder, or the
+          # upload will not be recognized as a skill.
+          unzip -l mortgage-refinance-analysis.zip \
+            | grep -q ' mortgage-refinance-analysis/SKILL.md$' \
+            || { echo "::error::SKILL.md is not at the expected path in the archive"; exit 1; }
+          for f in references/calculations.md references/extraction.md \
+                   references/regulations.md references/report-structure.md \
+                   scripts/mortgage_calc.py scripts/build_pdf.py; do
+            unzip -l mortgage-refinance-analysis.zip \
+              | grep -q " mortgage-refinance-analysis/$f\$" \
+              || { echo "::error::missing from archive: $f"; exit 1; }
+          done
+
+      - name: Attach it to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" mortgage-refinance-analysis.zip \
+            --title "$GITHUB_REF_NAME" \
+            --notes "Ready-to-upload skill archive. Download \`mortgage-refinance-analysis.zip\` below and upload it at claude.ai → Customize → Skills. See the README for the full walkthrough." \
+            || gh release upload "$GITHUB_REF_NAME" mortgage-refinance-analysis.zip --clobber

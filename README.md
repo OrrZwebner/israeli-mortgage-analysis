@@ -32,15 +32,13 @@ Copy `skills/mortgage-refinance-analysis/` into your skills directory, or upload
 
 No terminal, no Claude Code. Install it as a **skill** instead of a plugin. Requires a paid Claude plan.
 
-1. On this page, click the green **Code** button → **Download ZIP**, then open the downloaded file to unzip it.
-2. Inside, open the `skills` folder. Right-click the `mortgage-refinance-analysis` folder and choose **Compress** (Mac) or **Send to → Compressed (zipped) folder** (Windows). You now have `mortgage-refinance-analysis.zip`.
-3. Go to **claude.ai** → **Customize** in the left sidebar → **Skills**.
-4. Click **Upload skill** and pick the zip you just made. If it is rejected, rename its extension from `.zip` to `.skill` and try again.
-5. Check that the toggle next to **mortgage-refinance-analysis** is **on**.
+1. Download **`mortgage-refinance-analysis.zip`** from the [latest release](../../releases/latest). Don't unzip it.
+2. Go to **claude.ai** → **Customize** in the left sidebar → **Skills**.
+3. Click **Upload skill**, pick the file you just downloaded, and make sure the toggle next to **mortgage-refinance-analysis** is **on**.
 
 Then start a new chat, attach your mortgage PDFs, and ask in Hebrew — see [Usage](#usage). Claude loads the skill by itself once it sees the documents; you don't need to name it.
 
-Step 2 matters: you compress the **skill folder**, not the whole download, so that `SKILL.md` sits at the top of the archive.
+> Use the release file, not the green **Code → Download ZIP** button. That button gives you the entire repository, which buries `SKILL.md` three folders deep and won't be recognized as a skill. The release archive is built for uploading as-is.
 
 **Which files to attach** — ask your bank for `אישור יתרות משכנתא` or `נתונים לסילוק מלא`, one per file number (`תיק`). Add the refinancing offer (`אישור עקרוני להלוואה לדיור`) if you have one, and you get the fuller Mode B opinion.
 

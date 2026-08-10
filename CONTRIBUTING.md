@@ -42,6 +42,21 @@ covering Hebrew. Check with:
 which pandoc wkhtmltopdf && fc-list :lang=he | head
 ```
 
+## Cutting a release
+
+The claude.ai instructions in the README point at a `mortgage-refinance-analysis.zip`
+attached to the latest release. Don't build or commit that file by hand —
+[`.github/workflows/release.yml`](.github/workflows/release.yml) builds it from
+`skills/` and attaches it whenever you push a `v*` tag:
+
+```bash
+git tag v1.1.0 && git push origin v1.1.0
+```
+
+The workflow fails the build if `SKILL.md` or any reference or script is
+missing from the archive, or if `SKILL.md` is not directly inside the single
+top-level folder — that layout is what makes the file uploadable as-is.
+
 ## Keeping `SKILL.md` short
 
 Everything under `references/` is loaded **on demand**, only when the analysis
