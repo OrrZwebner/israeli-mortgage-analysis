@@ -1,0 +1,10 @@
+{
+  "name": "israeli-mortgage-analysis",
+  "version": "1.0.0",
+  "description": "Analyze Israeli mortgages from bank payoff statements and produce a full Hebrew refinancing analysis report (Markdown + RTL PDF), with or without a bank refinancing offer.",
+  "author": {
+    "name": "Orr"
+  },
+  "keywords": ["mortgage", "משכנתא", "מחזור משכנתא", "israel", "finance", "hebrew", "rtl"],
+  "skills": ["./skills/mortgage-refinance-analysis"]
+}

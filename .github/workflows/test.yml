@@ -1,0 +1,128 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  mortgage-calc:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: skills/mortgage-refinance-analysis
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # All inputs below are synthetic round numbers chosen to make the
+      # expected results checkable by hand. Every assertion parses the JSON
+      # the script emits and compares numerically with a tolerance, so float
+      # formatting differences cannot produce a false failure.
+      #   currency: 0.01    coefficient: 1e-5
+
+      - name: "Test 1 - Spitzer payment"
+        run: |
+          python3 -c '
+          import json, subprocess
+          out = subprocess.run(
+              ["python3", "scripts/mortgage_calc.py", "pmt", "750000", "4.25", "300"],
+              capture_output=True, text=True, check=True).stdout
+          got = json.loads(out)
+          # annuity: P*r / (1 - (1+r)^-n), r = 4.25/12/100, n = 300
+          assert abs(got["payment"] - 4063.04) < 0.01, got
+          print("ok: payment", got["payment"])
+          '
+
+      - name: "Test 2 - index coefficient"
+        run: |
+          python3 -c '
+          import json, subprocess
+          out = subprocess.run(
+              ["python3", "scripts/mortgage_calc.py", "index",
+               "400000", "160.0", "128.0"],
+              capture_output=True, text=True, check=True).stdout
+          got = json.loads(out)
+          # 160/128 = 1.25 exactly, so linkage = 400000 * 0.25
+          assert abs(got["coefficient"] - 1.25) < 1e-5, got
+          assert abs(got["linkage"] - 100000.00) < 0.01, got
+          print("ok: coefficient", got["coefficient"], "linkage", got["linkage"])
+          '
+
+      - name: "Test 3 - delay cost"
+        run: |
+          python3 -c '
+          import json, subprocess
+          out = subprocess.run(
+              ["python3", "scripts/mortgage_calc.py", "delay", "800000", "6.5", "4.5"],
+              capture_output=True, text=True, check=True).stdout
+          got = json.loads(out)
+          # 800000 * 2.00% / 12 = 1333.33
+          assert abs(got["monthly"] - 1333.33) < 0.01, got
+          assert abs(got["annual"] - 16000.00) < 0.01, got
+          print("ok: monthly", got["monthly"])
+          '
+
+      - name: "Test 4 - exit-station stress test"
+        run: |
+          python3 -c '
+          import json, subprocess
+          out = subprocess.run(
+              ["python3", "scripts/mortgage_calc.py", "stress",
+               "900000", "4.0", "300", "24",
+               "--scenarios", "4.0", "5.0", "6.0", "7.0"],
+              capture_output=True, text=True, check=True).stdout
+          got = json.loads(out)
+          assert abs(got["balance_at_station"] - 856336.69) < 0.01, got
+          assert got["months_remaining"] == 276, got
+          expected = [(4.0, 4750.53), (5.0, 5227.13), (6.0, 5727.58), (7.0, 6250.57)]
+          scenarios = got["scenarios"]
+          assert len(scenarios) == len(expected), got
+          for scenario, (rate, payment) in zip(scenarios, expected):
+              assert abs(scenario["rate"] - rate) < 1e-5, scenario
+              assert abs(scenario["payment"] - payment) < 0.01, scenario
+          print("ok: balance", got["balance_at_station"],
+                "payments", [s["payment"] for s in scenarios])
+          '
+
+      - name: "Test 5 - verification identities"
+        run: |
+          python3 -c '
+          import json, os, subprocess, tempfile
+          # Two synthetic tracks built so every identity closes exactly:
+          # coefficients are 160/128 = 1.25 and 160/125 = 1.28, and each
+          # no-notice fee is 0.1% of principal plus its linkage.
+          tracks = {
+              "known_index": 160.0,
+              "tracks": [
+                  {"name": "A-1", "principal": 400000.00, "principal_linkage": 100000.00,
+                   "interest": 1500.00, "interest_linkage": 375.00, "subtotal": 501875.00,
+                   "base_index": 128.0, "no_notice_fee": 500.00, "total_fee": 1500.00,
+                   "payoff": 503375.00},
+                  {"name": "B-2", "principal": 250000.00, "principal_linkage": 70000.00,
+                   "interest": 1000.00, "interest_linkage": 280.00, "subtotal": 321280.00,
+                   "base_index": 125.0, "no_notice_fee": 320.00, "total_fee": 800.00,
+                   "payoff": 322080.00},
+              ],
+          }
+          path = os.path.join(tempfile.mkdtemp(), "tracks.json")
+          with open(path, "w") as fh:
+              json.dump(tracks, fh)
+          out = subprocess.run(
+              ["python3", "scripts/mortgage_calc.py", "verify", path],
+              capture_output=True, text=True, check=True).stdout
+          got = json.loads(out)
+          assert got["all_passed"] is True, got
+          assert abs(got["sum_of_subtotals"] - 823155.00) < 0.01, got
+          for track in got["tracks"]:
+              for check in track["checks"]:
+                  assert check["pass"], (track["track"], check)
+                  assert abs(check["delta"]) < 0.01, (track["track"], check)
+          print("ok: all_passed", got["all_passed"],
+                "sum_of_subtotals", got["sum_of_subtotals"])
+          '
