@@ -43,6 +43,10 @@ with:
 which pandoc wkhtmltopdf google-chrome chromium && fc-list :lang=he | head
 ```
 
+It uses `wkhtmltopdf` when installed and otherwise falls back to headless Chrome,
+Chromium, Edge, or Brave, found on `PATH`, at the usual macOS/Linux install
+locations, or via `CHROME_PATH`. Force one with `--engine wkhtmltopdf|chrome`.
+
 Keep the fallback stdlib-only: it shells out via `shutil.which` and
 `subprocess`, so the no-dependencies rule above still holds.
 

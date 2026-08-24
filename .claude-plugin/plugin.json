@@ -5,6 +5,17 @@
   "author": {
     "name": "Orr"
   },
-  "keywords": ["mortgage", "משכנתא", "מחזור משכנתא", "israel", "finance", "hebrew", "rtl"],
-  "skills": ["./skills/mortgage-refinance-analysis"]
+  "license": "MIT",
+  "keywords": [
+    "mortgage",
+    "משכנתא",
+    "מחזור משכנתא",
+    "israel",
+    "finance",
+    "hebrew",
+    "rtl"
+  ],
+  "skills": [
+    "./skills/mortgage-refinance-analysis"
+  ]
 }
