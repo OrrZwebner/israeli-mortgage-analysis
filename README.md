@@ -23,11 +23,16 @@ This plugin extracts every figure from the bank's own statements, **verifies the
 
 **מה לבקש מהבנק:** `אישור יתרות משכנתא` או `נתונים לסילוק מלא` — אחד לכל מספר תיק. אם יש לכם גם הצעת מחזור (`אישור עקרוני להלוואה לדיור`), צרפו גם אותה ותקבלו חוות דעת מלאה על ההצעה עצמה.
 
-**שלוש דרכים להשתמש, מהקלה למתקדמת:**
+**ארבע דרכים להשתמש. הן חלופות — בוחרים אחת לפי איך שאתם עובדים מול Claude:**
 
-1. **הכי מהיר, בלי להתקין כלום** — פותחים צ׳אט ב-claude.ai, מצרפים את קובצי ה-PDF, ומדביקים את הפרומפט המוכן שב[מסלול 0](#option-0--quickest-look-nothing-to-install).
-2. **הכי מומלץ לשימוש חוזר** — מורידים את `mortgage-refinance-analysis.zip` מ[הגרסה האחרונה](../../releases/latest), ומעלים אותו ב-claude.ai דרך **Customize → Skills → Upload skill**. פירוט ב[מסלול A](#option-a--claudeai-or-the-claude-app--no-terminal).
-3. **ממשק גרפי על המחשב שלכם** — [Quick start](#quick-start--the-dashboard-no-coding-needed): גוררים את קובצי ה-PDF לדף, לוחצים על כפתור אחד, ומקבלים את הדוח. דורש התקנה חד-פעמית.
+| | הדרך | למי |
+|---|---|---|
+| **0** | [פרומפט להעתקה](#option-0--quickest-look-nothing-to-install) — בלי להתקין כלום | רוצים לראות מה זה אומר, עכשיו |
+| **1** | [Skill](#option-a--claudeai-or-the-claude-app--no-terminal) — מעלים קובץ אחד ל-claude.ai | משתמשים ב-Claude בדפדפן או באפליקציה |
+| **2** | [Plugin](#option-b--claude-code-as-a-plugin) — שתי פקודות ב-Claude Code | משתמשים ב-Claude Code בטרמינל |
+| **3** | [ממשק גרפי מקומי](#quick-start--the-dashboard-no-coding-needed) — גוררים PDF, לוחצים כפתור | מעדיפים דף על פני צ׳אט; דורש התקנה חד-פעמית |
+
+מסלול 0 הוא הכי מהיר להתחלה, מסלול 1 הכי נוח לשימוש חוזר, ומסלול 3 הכי נוח בפועל — בתמורה להתקנה. (יש גם [מסלול C](#option-c--claude-code-as-a-standalone-skill): העתקת תיקיית ה-Skill ל-Claude Code בלי עטיפת ה-Plugin.)
 
 **אין גרסה מקוונת, וזה במכוון.** הניתוח רץ מול חשבון ה-Claude שלכם, והמסמכים לא עוזבים את המחשב שלכם. אנתרופיק גם אינה מתירה לאפליקציות צד-שלישי להציע התחברות עם חשבון Claude.
 
