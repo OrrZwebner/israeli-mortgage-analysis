@@ -158,18 +158,42 @@ jobs:
           print("ok:", out.strip(), "|", box)
           '
 
+      # The engine-missing path cannot be reproduced by clearing PATH alone:
+      # find_chrome() also probes absolute install locations, and GitHub runners
+      # ship Chrome at /opt/google/chrome/chrome. So drive the resolver directly
+      # with nothing to find, and check the command line failure with an engine
+      # that is genuinely absent in this job (wkhtmltopdf is never installed).
       - name: "Test 7 - missing engine fails with a usable message"
         run: |
           python3 -c '
-          import os, pathlib, subprocess, tempfile
+          import importlib.util, os, pathlib, subprocess, tempfile
+          spec = importlib.util.spec_from_file_location("bp", "scripts/build_pdf.py")
+          bp = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(bp)
+
+          # (a) nothing installed anywhere: the install hint, exit 1
+          real_path = os.environ["PATH"]
+          bp.CHROME_CANDIDATES = ()
+          os.environ.pop("CHROME_PATH", None)
+          os.environ["PATH"] = "/nonexistent"
+          try:
+              bp.resolve_engine("auto")
+          except SystemExit as exc:
+              assert "no PDF engine found" in str(exc), exc
+          else:
+              raise AssertionError("resolve_engine found an engine with nothing installed")
+
+          # (b) a named engine that is absent: exit 1, and say which tool.
+          # PATH goes back first, or the subprocess below cannot find python3.
+          os.environ["PATH"] = real_path
           tmp = pathlib.Path(tempfile.mkdtemp())
           md = tmp / "r.md"
           md.write_text("# בדיקה\n", encoding="utf-8")
-          env = dict(os.environ, PATH="/usr/bin:/bin", CHROME_PATH="")
           got = subprocess.run(
-              ["python3", "scripts/build_pdf.py", str(md), str(tmp / "r.pdf")],
-              capture_output=True, text=True, env=env)
+              ["python3", "scripts/build_pdf.py", str(md), str(tmp / "r.pdf"),
+               "--engine", "wkhtmltopdf"],
+              capture_output=True, text=True)
           assert got.returncode == 1, got
-          assert "no PDF engine found" in got.stderr, got.stderr
-          print("ok: engine-missing message")
+          assert "missing required tool: wkhtmltopdf" in got.stderr, got.stderr
+          print("ok: engine-missing messages")
           '
