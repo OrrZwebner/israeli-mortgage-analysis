@@ -2,9 +2,7 @@
 
 A Claude skill that reads Israeli bank mortgage documents and writes a full Hebrew refinancing analysis — Markdown plus a styled RTL PDF.
 
-Israeli mortgages are split into tracks (`מסלולים`) with different rate mechanisms, linkage bases, and reset cycles, so whether refinancing pays is a per-track question. The answer is often counterintuitive: an old fixed non-linked track is usually worth protecting at all costs, while an index-linked track that just reset can be costing far more in nominal terms than its stated real rate suggests.
-
-This extracts every figure from the bank's own statements, **verifies the extraction against reconciliation identities**, ranks each track by refinancing priority using the bank's own `שיעור הריבית לצרכי השוואה`, and writes a report you can take to your banker.
+It reads the figures out of the bank's own statements, checks them against the statement totals, works through the mortgage track by track, and writes a report you can take to your banker.
 
 | Mode | You provide | You get |
 |---|---|---|
@@ -138,22 +136,12 @@ The script installs what it needs on the first run, checks the environment, and 
 
 After that, starting it is just `cd israeli-mortgage-analysis && ./run.sh`. For your phone, use `./run.sh --mobile` and scan the QR code it prints (same Wi-Fi). Troubleshooting, configuration, and what the agent is allowed to do: [`web/README.md`](web/README.md).
 
-## What it checks that people miss
-
-- **Rate resets that already happened** — variable tracks reset on a cycle from origination; a reset often explains a payment jump nobody registered, and is frequently the whole reason refinancing suddenly makes sense
-- **Stale advisor reports** — a third-party `דוח משכנתא` goes out of date the moment a track resets, understating the true cost
-- **The 5% framework buffer** — approvals quote a framework ~5% above the real balance, inflating every headline figure in the offer
-- **Rate holding protects the margin, not the rate** — on variable tracks the quoted rate is indicative; the anchor is set at execution
-- **Average-index fee timing** — on linked tracks, executing from the 16th of the month avoids it entirely, at zero cost
-- **No-notice fee waiver** — the prepayment order waives it when the same bank funds the refinance
-- **Composition limits** — Directive 329 defines "variable" more broadly than most commentary assumes, and its refinancing test is incremental rather than absolute
-
 ## What's in here
 
 ```
 skills/mortgage-refinance-analysis/
 ├── SKILL.md          the method
-├── references/       bank-PDF field map · formulas · Directives 329/451 · report structure
+├── references/       field maps, formulas, regulatory framework, report structure
 └── scripts/          mortgage_calc.py (calculations + verification) · build_pdf.py (RTL PDF)
 web/                  the dashboard — Agent SDK + Express + one HTML page
 ```
