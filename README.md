@@ -15,6 +15,26 @@ This plugin extracts every figure from the bank's own statements, **verifies the
 | **A** | `אישור יתרות משכנתא` / `נתונים לסילוק מלא` / `לוח סילוקין` | `ניתוח משכנתא וכדאיות למחזור` — per-track diagnosis, refinancing priority, target terms to demand, action items |
 | **B** | The above **plus** `אישור עקרוני להלוואה לדיור` | Full opinion — recommendation, small-print findings, economic analysis at the borrower's actual horizon, stress tests, exit-station plan, action items |
 
+<div dir="rtl">
+
+## מדריך מהיר · עברית
+
+הכלי קורא את מסמכי המשכנתא שהבנק נותן לכם, ומפיק **דוח ניתוח וכדאיות מחזור בעברית** — מסלול אחר מסלול, כשכל מספר בדוח מאומת מול הסכומים של הבנק עצמו.
+
+**מה לבקש מהבנק:** `אישור יתרות משכנתא` או `נתונים לסילוק מלא` — אחד לכל מספר תיק. אם יש לכם גם הצעת מחזור (`אישור עקרוני להלוואה לדיור`), צרפו גם אותה ותקבלו חוות דעת מלאה על ההצעה עצמה.
+
+**שלוש דרכים להשתמש, מהקלה למתקדמת:**
+
+1. **הכי מהיר, בלי להתקין כלום** — פותחים צ׳אט ב-claude.ai, מצרפים את קובצי ה-PDF, ומדביקים את הפרומפט המוכן שב[מסלול 0](#option-0--quickest-look-nothing-to-install).
+2. **הכי מומלץ לשימוש חוזר** — מורידים את `mortgage-refinance-analysis.zip` מ[הגרסה האחרונה](../../releases/latest), ומעלים אותו ב-claude.ai דרך **Customize → Skills → Upload skill**. פירוט ב[מסלול A](#option-a--claudeai-or-the-claude-app--no-terminal).
+3. **ממשק גרפי על המחשב שלכם** — [Quick start](#quick-start--the-dashboard-no-coding-needed): גוררים את קובצי ה-PDF לדף, לוחצים על כפתור אחד, ומקבלים את הדוח. דורש התקנה חד-פעמית.
+
+**אין גרסה מקוונת, וזה במכוון.** הניתוח רץ מול חשבון ה-Claude שלכם, והמסמכים לא עוזבים את המחשב שלכם. אנתרופיק גם אינה מתירה לאפליקציות צד-שלישי להציע התחברות עם חשבון Claude.
+
+הדוח אינו ייעוץ פיננסי מורשה. מטרתו לתת לכם את המספרים ואת השאלות הנכונות מול הבנקאי או היועץ.
+
+</div>
+
 ## Quick start — the dashboard (no coding needed)
 
 A web page on your own computer: drag the bank PDFs in, press one button, get the report. Your documents never leave your machine. This is the easiest way to use this project, whether or not you write code — the only requirement is a **paid Claude plan**.
@@ -71,9 +91,36 @@ The skill also works conversationally inside Claude itself — no dashboard, you
 
 | How you use Claude | Use |
 |---|---|
+| You just want to see what it says, right now | **Option 0** — paste a prompt, install nothing |
 | In the browser at **claude.ai**, or the Claude desktop app | **Option A** — upload one file, no terminal |
 | In **Claude Code** (terminal) | **Option B** — install as a plugin |
 | In **Claude Code**, and you want the skill without the plugin wrapper | **Option C** — copy the skill folder |
+
+---
+
+### Option 0 — quickest look, nothing to install
+
+Nothing to download and nothing to set up. Claude reads the skill's own files straight out of this repository, so you get the same method without installing it.
+
+1. Open a new chat at **claude.ai** (web access must be enabled).
+2. Attach your mortgage PDFs.
+3. Paste this:
+
+```
+מצורפים אישורי יתרות משכנתא לניתוח.
+
+לפני שאתה מתחיל, קרא את הקבצים הבאים ופעל לפיהם במדויק:
+https://raw.githubusercontent.com/OrrZwebner/israeli-mortgage-analysis/main/skills/mortgage-refinance-analysis/SKILL.md
+https://raw.githubusercontent.com/OrrZwebner/israeli-mortgage-analysis/main/skills/mortgage-refinance-analysis/references/extraction.md
+https://raw.githubusercontent.com/OrrZwebner/israeli-mortgage-analysis/main/skills/mortgage-refinance-analysis/references/calculations.md
+https://raw.githubusercontent.com/OrrZwebner/israeli-mortgage-analysis/main/skills/mortgage-refinance-analysis/references/regulations.md
+https://raw.githubusercontent.com/OrrZwebner/israeli-mortgage-analysis/main/skills/mortgage-refinance-analysis/references/report-structure.md
+
+חלץ כל נתון מהמסמכים, אמת את החילוץ מול הסכומים של הבנק עצמו,
+בדוק את תנאי השוק העדכניים, וכתוב את הדוח המלא בעברית לפי report-structure.md.
+```
+
+> **This is the weakest of the routes**, and worth knowing why. Pasting a bare link to this repository does *not* load the skill — Claude reads the README at best and writes a confident report without the reconciliation checks, which is the exact failure this skill exists to prevent. The prompt above fixes that by naming the files. Even so, `mortgage_calc.py` never runs, so the arithmetic is checked by hand rather than by the script, and there is no styled RTL PDF. Fine for a first look; use **Option A** if the answer will inform a real decision.
 
 ---
 
